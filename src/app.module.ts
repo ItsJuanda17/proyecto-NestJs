@@ -3,6 +3,7 @@ import { TasksModule } from './tasks/tasks.module';
 import { ProjectsModule } from './projects/projects.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { SeedModule } from './seed/seed.module';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
@@ -25,6 +26,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     TasksModule,
     ProjectsModule,
     AuthModule,
+    SeedModule,
   ],
   controllers: [],
   providers: [],
