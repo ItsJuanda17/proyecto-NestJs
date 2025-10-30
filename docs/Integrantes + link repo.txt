@@ -1,0 +1,3 @@
+Integrantes: Juan David Acevedo y Jose Manuel Cardona
+
+Link al repositorio: https://github.com/ItsJuanda17/proyecto-NestJs.git
