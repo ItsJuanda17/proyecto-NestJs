@@ -67,6 +67,14 @@ export class SeedService {
         role: 'usuario' as const,
         isActive: true,
       },
+
+      {
+        email: 'usuario3@example.com',
+        password: this.hashPassword('User123!'),
+        fullname: 'Usuario Tres',
+        role: 'usuario' as const,
+        isActive: true,
+      }
     ];
 
     const users = this.userRepository.create(seedUsers);

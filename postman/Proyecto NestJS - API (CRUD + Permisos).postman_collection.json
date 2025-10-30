@@ -1,0 +1,1238 @@
+{
+	"info": {
+		"_postman_id": "157b3e94-940e-4a34-b351-c7d6f4b25efd",
+		"name": "Proyecto NestJS - API (CRUD + Permisos)",
+		"description": "Colección con flujos de autenticación, usuarios, proyectos y tareas; valida permisos de propietario y superadmin.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "39401238",
+		"_collection_link": "https://the-beans.postman.co/workspace/591bb61b-a756-4649-9a04-d4d9754d0d83/collection/39401238-157b3e94-940e-4a34-b351-c7d6f4b25efd?action=share&source=collection_link&creator=39401238"
+	},
+	"item": [
+		{
+			"name": "Seed",
+			"item": [
+				{
+					"name": "Initial data",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/seed",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"seed"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Login - Admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.response.to.have.status(200).or.have.status(201);",
+									"const data = pm.response.json(); pm.expect(data).to.have.property('token'); pm.collectionVariables.set('admin_token', data.token);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"{{admin_email}}\",\n  \"password\": \"{{admin_password}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login - User1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.response.to.have.status(200).or.have.status(201);",
+									"const data = pm.response.json(); pm.collectionVariables.set('user1_token', data.token);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"{{user1_email}}\",\n  \"password\": \"{{user1_password}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login - User2",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.response.to.have.status(200).or.have.status(201);",
+									"const data = pm.response.json(); pm.collectionVariables.set('user2_token', data.token);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"{{user2_email}}\",\n  \"password\": \"{{user2_password}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login - User3",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.response.to.have.status(200).or.have.status(201);\r",
+									"const data = pm.response.json(); pm.collectionVariables.set('user3_token', data.token);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"{{user3_email}}\",\r\n  \"password\": \"{{user3_password}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "List Users (admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.response.to.have.status(200); const arr = pm.response.json(); pm.expect(arr).to.be.an('array');",
+									"const u1 = arr.find(u=>u.email===pm.collectionVariables.get('user1_email')); if(u1){ pm.collectionVariables.set('user1_id', u1.id);} ",
+									"const u2 = arr.find(u=>u.email===pm.collectionVariables.get('user2_email')); if(u2){ pm.collectionVariables.set('user2_id', u2.id);} "
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/users",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User by Id (admin -> user1)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.response.to.have.status(200);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/users/{{user1_id}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"{{user1_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update User (admin -> user2)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.response.to.have.status(200);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"fullname\": \"Usuario Dos Editado\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users/{{user2_id}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"{{user2_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User (admin -> user3)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.response.to.have.status(200).or.have.status(204);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/users/{{user3_id}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"{{user3_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Projects",
+			"item": [
+				{
+					"name": "Create Project (user1)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.response.to.have.status(201); const data = pm.response.json(); pm.collectionVariables.set('project_id_user1', data.id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user1_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Proyecto User1\",\n  \"description\": \"Desc\",\n  \"status\": \"in-progress\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/projects",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"projects"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Project (user2)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.response.to.have.status(201); const data = pm.response.json(); pm.collectionVariables.set('project_id_user2', data.id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user2_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Proyecto User2\",\n  \"description\": \"Desc\",\n  \"status\": \"pending\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/projects",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"projects"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Project to delete(user1)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.response.to.have.status(201); const data = pm.response.json(); pm.collectionVariables.set('project2_id_user1', data.id);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user1_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"title\": \"Proyecto2.1 User1\",\r\n  \"description\": \"Desc\",\r\n  \"status\": \"in-progress\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/projects",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"projects"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Project (user1 -> own)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.response.to.have.status(200);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user1_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/projects/{{project_id_user1}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"projects",
+								"{{project_id_user1}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Project (user1 -> own)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.response.to.have.status(200);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user1_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Proyecto User1 Editado\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/projects/{{project_id_user1}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"projects",
+								"{{project_id_user1}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Project (user1 -> own)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.response.to.have.status(200).or.have.status(204);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user1_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/projects/{{project2_id_user1}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"projects",
+								"{{project2_id_user1}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Tasks",
+			"item": [
+				{
+					"name": "Create Task (user1 on project1)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.response.to.have.status(201); const data = pm.response.json(); pm.collectionVariables.set('task_id_user1', data.id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user1_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Tarea user1\",\n  \"description\": \"d\",\n  \"status\": \"in-progress\",\n  \"priority\": \"high\",\n  \"projectId\": \"{{project_id_user1}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/tasks",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"tasks"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Task (user1 -> own)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.response.to.have.status(200);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user1_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/tasks/{{task_id_user1}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"tasks",
+								"{{task_id_user1}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Task (user1 -> own)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.response.to.have.status(200);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user1_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Tarea user1 Editada\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/tasks/{{task_id_user1}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"tasks",
+								"{{task_id_user1}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Task (user1 -> own)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.response.to.have.status(200).or.have.status(204);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user1_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/tasks/{{task_id_user1}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"tasks",
+								"{{task_id_user1}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Tasks (user1)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.response.to.have.status(200);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user1_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/tasks",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"tasks"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Tasks by Project (user1)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.response.to.have.status(200);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user1_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/tasks/project/{{project_id_user1}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"tasks",
+								"project",
+								"{{project_id_user1}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Permissions (Forbidden cases)",
+			"item": [
+				{
+					"name": "User2 DELETE Project of User1 → 403",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.response.to.have.status(403);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user2_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/projects/{{project_id_user1}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"projects",
+								"{{project_id_user1}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "User1 DELETE Project of User2 → 403",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.response.to.have.status(403);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user1_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/projects/{{project_id_user2}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"projects",
+								"{{project_id_user2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "User2 DELETE Task of User1 → 403",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.response.to.have.status(403);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user2_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/tasks/{{task_id_user1}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"tasks",
+								"{{task_id_user1}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "User1 DELETE Task of User2 → 403",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.response.to.have.status(403);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user1_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/tasks/{{task_id_user2}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"tasks",
+								"{{task_id_user2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "User1 UPDATE Project of User2 → 403",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.response.to.have.status(403);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user1_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Hack Title\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/projects/{{project_id_user2}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"projects",
+								"{{project_id_user2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "User2 UPDATE Task of User1 → 403",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.response.to.have.status(403);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user2_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Hack Task\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/tasks/{{task_id_user1}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"tasks",
+								"{{task_id_user1}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Admin Overrides",
+			"item": [
+				{
+					"name": "Admin DELETE Project of User1 → 200/204",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.response.to.have.status(200).or.have.status(204);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/projects/{{project_id_user1}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"projects",
+								"{{project_id_user1}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Admin DELETE Task of User1 → 200/204",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.response.to.have.status(200).or.have.status(204);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/tasks/{{task_id_user1}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"tasks",
+								"{{task_id_user1}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000/api/v1"
+		},
+		{
+			"key": "admin_email",
+			"value": "admin@example.com"
+		},
+		{
+			"key": "admin_password",
+			"value": "Admin123!"
+		},
+		{
+			"key": "user1_email",
+			"value": "usuario1@example.com"
+		},
+		{
+			"key": "user1_password",
+			"value": "User123!"
+		},
+		{
+			"key": "user2_email",
+			"value": "usuario2@example.com"
+		},
+		{
+			"key": "user2_password",
+			"value": "User123!"
+		},
+		{
+			"key": "admin_token",
+			"value": ""
+		},
+		{
+			"key": "user1_token",
+			"value": ""
+		},
+		{
+			"key": "user2_token",
+			"value": ""
+		},
+		{
+			"key": "user1_id",
+			"value": ""
+		},
+		{
+			"key": "user2_id",
+			"value": ""
+		},
+		{
+			"key": "project_id_user1",
+			"value": ""
+		},
+		{
+			"key": "project_id_user2",
+			"value": ""
+		},
+		{
+			"key": "task_id_user1",
+			"value": ""
+		},
+		{
+			"key": "task_id_user2",
+			"value": ""
+		},
+		{
+			"key": "user3_email",
+			"value": ""
+		},
+		{
+			"key": "user3_password",
+			"value": ""
+		},
+		{
+			"key": "user3_token",
+			"value": ""
+		},
+		{
+			"key": "user3_id",
+			"value": ""
+		},
+		{
+			"key": "project2_id_user1",
+			"value": ""
+		}
+	]
+}

@@ -42,7 +42,7 @@ export class Task {
   })
   dueDate: Date;
 
-  @ManyToOne(() => Project, (project) => project.tasks, { eager: false })
+  @ManyToOne(() => Project, (project) => project.tasks, { eager: false, onDelete: 'CASCADE' })
   project: Project;
 
   @Column()
