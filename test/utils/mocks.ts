@@ -1,5 +1,3 @@
-// Simple test helpers that return plain JS objects typed as `any` to avoid
-// TypeScript issues in test environments (no TypeORM generics or jest types).
 export const mockRepository = <T = any>(): any => ({
   create: jest.fn(),
   save: jest.fn(),
