@@ -21,18 +21,17 @@
   <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
   [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## Description
+## Live Deployment
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+The project is deployed and live on Render. You can access the running API and Swagger documentation at:
 
-## Project setup
+- 🟢 **Production Swagger Docs:** [https://proyecto-nest-js.onrender.com/docs](https://proyecto-nest-js.onrender.com/docs)
 
-```bash
-$ npm install
-```
+This URL gives you access to try all endpoints and view API schemas live.
 
-## Compile and run the project
+---
 
+### Run project
 ```bash
 # development
 $ npm run start
