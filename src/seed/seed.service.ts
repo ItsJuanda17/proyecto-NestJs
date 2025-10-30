@@ -23,7 +23,7 @@ export class SeedService {
     await this.deleteTables();
     const users = await this.insertUsers();
     const projects = await this.insertProjects(users);
-    await this.insertTasks(projects, users);
+    const tasks = await this.insertTasks(projects, users);
 
     this.logger.log(' Seed ejecutado correctamente');
 
@@ -32,6 +32,7 @@ export class SeedService {
       data: {
         users: users.length,
         projects: projects.length,
+        tasks: tasks.length,
       },
     };
   }

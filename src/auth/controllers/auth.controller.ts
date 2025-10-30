@@ -1,4 +1,6 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
+import { UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthService } from '../services/auth.service';
 import { CreateUserDto } from '../dto/create-user.dto';
@@ -26,6 +28,12 @@ export class AuthController {
     return this.auth.login(dto);
   }
 
+    @Post('logout')
+    @UseGuards(JwtAuthGuard)
+    logout() {
+      // El cliente debe eliminar el token JWT. Aquí solo se responde OK.
+      return { message: 'Sesión cerrada correctamente. El token debe eliminarse en el cliente.' };
+    }
   @Auth()
   @ApiBearerAuth('bearer')
   @ApiResponse({ status: 200, description: 'Token válido' })
