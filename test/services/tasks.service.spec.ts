@@ -31,6 +31,13 @@ describe('TasksService (unit)', () => {
     expect(res.id).toBe('t1');
   });
 
+  it('create: lanza Forbidden si no es dueño y no es admin', async () => {
+    projectRepo.findOne.mockResolvedValue({ id: 'p1', userId: 'u2' } as any);
+    await expect(
+      service.create({ projectId: 'p1' } as any, { id: 'u1', role: 'usuario' } as any),
+    ).rejects.toThrow(ForbiddenException);
+  });
+
   it('findAll: should return all tasks for superadmin', async () => {
     taskRepo.find.mockResolvedValue([{ id: 'a1' }] as any);
 
@@ -65,6 +72,12 @@ describe('TasksService (unit)', () => {
   it('findOne: should throw NotFoundException when task missing', async () => {
     taskRepo.findOne.mockResolvedValue(null);
     await expect(service.findOne('no', { id: 'u1', role: 'usuario' } as any)).rejects.toThrow();
+  });
+
+  it('findOne: Forbidden cuando proyecto pertenece a otro usuario', async () => {
+    taskRepo.findOne.mockResolvedValue({ id: 't1', projectId: 'p1' } as any);
+    projectRepo.findOne.mockResolvedValue({ id: 'p1', userId: 'other' } as any);
+    await expect(service.findOne('t1', { id: 'u1', role: 'usuario' } as any)).rejects.toThrow(ForbiddenException);
   });
 
   it('update: should throw ForbiddenException when not owner', async () => {

@@ -88,4 +88,45 @@ describe('AuthService (unit)', () => {
     expect(res.user).toBe(user);
     expect(res.token).toBe('signed-token');
   });
+
+  it('create: lanza InternalServerError con detalle cuando code 23505', async () => {
+    const dto = { email: 'dup@example.com', password: 'x', fullname: 'Dup' } as any;
+    jest.spyOn(AuthService.prototype as any, 'encryptPassword').mockReturnValue('hashed');
+    userRepoMock.create.mockReturnValue({ id: '1', email: dto.email, password: 'hashed', fullname: dto.fullname });
+    userRepoMock.save.mockRejectedValue({ code: '23505', detail: 'duplicate key value violates unique constraint' });
+
+    await expect(authService.create(dto)).rejects.toThrow(InternalServerErrorException);
+    await expect(authService.create(dto)).rejects.toThrow(/duplicate key value/);
+  });
+
+  it('create: lanza InternalServerError genérico cuando error inesperado', async () => {
+    const dto = { email: 'err@example.com', password: 'x', fullname: 'Err' } as any;
+    jest.spyOn(AuthService.prototype as any, 'encryptPassword').mockReturnValue('hashed');
+    userRepoMock.create.mockReturnValue({ id: '1', email: dto.email, password: 'hashed', fullname: dto.fullname });
+    userRepoMock.save.mockRejectedValue(new Error('boom'));
+
+    await expect(authService.create(dto)).rejects.toThrow(InternalServerErrorException);
+    await expect(authService.create(dto)).rejects.toThrow(/Unexpected error/);
+  });
+
+  it('login: normaliza email (trim y lower) antes de buscar', async () => {
+    const email = '  USER@Example.COM  ';
+    const plain = 'pw';
+    const hashed = bcrypt.hashSync(plain, 10);
+    userRepoMock.findOne.mockResolvedValue({ id: 'u1', email: 'user@example.com', password: hashed, role: 'usuario', isActive: true } as any);
+
+    await authService.login({ email, password: plain } as any);
+
+    expect(userRepoMock.findOne).toHaveBeenCalledWith({
+      where: { email: 'user@example.com' },
+      select: { id: true, email: true, password: true, role: true, fullname: true, isActive: true },
+    });
+  });
+
+  it('encryptPassword: usa rounds de entorno', () => {
+    process.env.BCRYPT_SALT_ROUNDS = '4';
+
+    const res = (authService as any).encryptPassword('secret');
+    expect(typeof res).toBe('string');
+  });
 });

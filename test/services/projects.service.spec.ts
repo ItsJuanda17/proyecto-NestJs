@@ -100,4 +100,19 @@ describe('ProjectsService (unit)', () => {
     await expect(service.remove('p1', { id: 'u1', role: 'usuario' } as any)).resolves.toBeUndefined();
     expect(projectRepo.remove).toHaveBeenCalled();
   });
+
+  it('update: lanza Forbidden cuando otro usuario', async () => {
+    projectRepo.findOne.mockResolvedValue({ id: 'p1', userId: 'other' } as any);
+    await expect(
+      service.update('p1', { name: 'x' } as any, { id: 'u1', role: 'usuario' } as any),
+    ).rejects.toThrow(ForbiddenException);
+  });
+
+  it('remove: permite cuando superadmin', async () => {
+    projectRepo.findOne.mockResolvedValue({ id: 'p1', userId: 'u1' } as any);
+    projectRepo.remove.mockResolvedValue(undefined);
+
+    await expect(service.remove('p1', { id: 'sa', role: 'superadmin' } as any)).resolves.toBeUndefined();
+    expect(projectRepo.remove).toHaveBeenCalled();
+  });
 });
