@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY package*.json ./
 
-RUN npm ci --only=production && npm cache clean --force
+RUN npm ci && npm cache clean --force
 
 COPY . .
 
@@ -16,9 +16,11 @@ WORKDIR /app
 
 RUN apk add --no-cache dumb-init
 
-COPY --from=builder /app/node_modules ./node_modules
+COPY package*.json ./
+
+RUN npm ci --only=production && npm cache clean --force
+
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/package*.json ./
 
 ENV NODE_ENV=production
 ENV PORT=3000
