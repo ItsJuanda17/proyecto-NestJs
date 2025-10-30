@@ -12,9 +12,11 @@ RUN npm ci && npm run build
 FROM node:20-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
+# Dependencias de producción
 COPY --from=deps /app/node_modules ./node_modules
 COPY package*.json ./
-COPY dist ./dist
+# Artefactos compilados
+COPY --from=builder /app/dist ./dist
 ENV PORT=3000
 EXPOSE 3000
 CMD ["node", "dist/main.js"]
