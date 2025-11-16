@@ -6,12 +6,25 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-
+  // ✅ Configuración CORS mejorada
   app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3001',
+    origin: [
+      'http://localhost:3001',
+      'http://127.0.0.1:3001',
+      process.env.FRONTEND_URL || 'http://localhost:3001'
+    ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: [
+      'Content-Type', 
+      'Authorization', 
+      'Accept',
+      'Origin',
+      'X-Requested-With'
+    ],
+    exposedHeaders: ['Authorization'],
+    preflightContinue: false,
+    optionsSuccessStatus: 204
   });
 
   app.setGlobalPrefix('api/v1');
@@ -21,7 +34,7 @@ async function bootstrap() {
       whitelist: true, 
       forbidNonWhitelisted: true,
       transform: true,
-     }),
+    }),
   );
 
   const config = new DocumentBuilder()
@@ -43,7 +56,11 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);
 
-
-  await app.listen(process.env.PORT ?? 3000);
+  const port = process.env.PORT ?? 3000;
+  await app.listen(port);
+  
+  console.log(`\n Servidor corriendo en: http://localhost:${port}`);
+  console.log(` Documentación API: http://localhost:${port}/docs`);
+  console.log(` Frontend esperado en: ${process.env.FRONTEND_URL || 'http://localhost:3001'}\n`);
 }
 bootstrap();
