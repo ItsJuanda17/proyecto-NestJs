@@ -128,6 +128,137 @@ proyecto-nest-js/
 
 ---
 
+## Funcionalidad de módulos y componentes
+
+### Módulo Auth
+
+Responsabilidad general: Gestionar autenticación (verificar identidad) y autorización (verificar permisos) mediante JWT.
+
+#### Decoradores (`auth/decorators/`)
+
+- **`@Auth(...roles)`** (`auth.decorator.ts`):
+  - **Función**: Decorador compuesto que encapsula autenticación y autorización.
+  - **Comportamiento**: Aplica `@Roles(...)` para guardar metadata de roles requeridos y activa `UseGuards(JwtAuthGuard, RolesGuard)`.
+  - **Uso**: Se coloca en endpoints protegidos. Ej: `@Auth('superadmin')` o `@Auth()` para solo autenticación.
+  - **Ventaja**: Evita repetir código en controladores; reutiliza lógica transversal.
+
+- **`@Roles(...roles)`** (`roles.decorator.ts`):
+  - **Función**: Guarda metadata con los roles permitidos usando `SetMetadata` y la clave `ROLES_KEY`.
+  - **Comportamiento**: No ejecuta validación por sí mismo; solo almacena información que luego lee `RolesGuard`.
+  - **Uso**: Normalmente se usa indirectamente a través de `@Auth(...roles)`, pero puede usarse de forma independiente.
+
+- **`@GetUser()`** (`get-user.decorator.ts`):
+  - **Función**: Extrae el usuario autenticado del `request` (puesto ahí por `JwtStrategy.validate`).
+  - **Comportamiento**: Crea un parámetro personalizado que accede a `req.user`. Puede extraer un campo específico: `@GetUser('email')`.
+  - **Uso**: En handlers protegidos para obtener el usuario sin manipular `req` manualmente.
+  - **Ventaja**: Mantiene controladores limpios y facilita testing.
+
+- **`@RawHeaders()`** (`raw-header.decorator.ts`):
+  - **Función**: Extrae los headers HTTP "en crudo" como arreglo de strings para depuración o inspección.
+  - **Comportamiento**: Accede a `req.rawHeaders`.
+  - **Uso**: Depuración o cuando se necesita acceso directo a headers sin parseo.
+  - **Nota**: Actualmente no se utiliza en el proyecto, pero está disponible para casos especiales.
+
+#### Guards (`auth/guards/`)
+
+- **`JwtAuthGuard`** (`jwt-auth.guard.ts`):
+  - **Función**: Valida que la petición incluya un JWT válido antes de llegar al controlador.
+  - **Comportamiento**: Extiende `AuthGuard('jwt')` de Passport, que busca la estrategia registrada con nombre `'jwt'` (tu `JwtStrategy`).
+  - **Flujo**: Extrae el token del header `Authorization: Bearer <token>`, verifica la firma con `JWT_SECRET`, llama a `JwtStrategy.validate(payload)` y adjunta el `User` resultante a `req.user`.
+  - **Si falla**: Retorna `401 Unauthorized` automáticamente.
+
+- **`RolesGuard`** (`roles-guard.ts`):
+  - **Función**: Verifica que el usuario autenticado tenga uno de los roles requeridos.
+  - **Comportamiento**: 
+    1. Lee la metadata de roles guardada por `@Roles(...)` o `@Auth(...roles)` usando `Reflector`.
+    2. Compara `req.user.role` con los roles requeridos.
+    3. Si no hay roles requeridos, permite el acceso.
+    4. Si el usuario no tiene el rol requerido, lanza `403 Forbidden`.
+  - **Dependencia**: Requiere que `JwtAuthGuard` haya ejecutado primero para que `req.user` exista.
+  - **Ventaja**: Centraliza la lógica de autorización por roles.
+
+#### Estrategias (`auth/strategies/`)
+
+- **`JwtStrategy`** (`jwt.strategy.ts`):
+  - **Función**: Define cómo Passport extrae y valida el JWT, y cómo se construye el objeto `User` en `req.user`.
+  - **Configuración**: En el constructor, define el secreto (`JWT_SECRET`) y de dónde extraer el token (header `Authorization: Bearer`).
+  - **Método `validate(payload)`**:
+    - Recibe el payload decodificado del JWT (`{ id, email, role }`).
+    - Busca el usuario en BD por `id`.
+    - Valida que el usuario exista y esté activo (`isActive === true`).
+    - Retorna el `User` completo (sin password) que Passport adjunta a `req.user`.
+  - **Registro**: Se registra automáticamente como estrategia `'jwt'` al extender `PassportStrategy(Strategy)`.
+
+#### Servicios (`auth/services/`)
+
+- **`AuthService`** (`auth.service.ts`):
+  - **Función**: Contiene la lógica de negocio para registro, login y generación de tokens.
+  - **Métodos principales**:
+    - `create(dto)`: Registra un nuevo usuario. Hashea la contraseña con `bcrypt`, crea la entidad, guarda en BD y retorna el usuario sin password.
+    - `login(dto)`: Valida email (normalizado) y contraseña con `bcrypt`, verifica `isActive`, y retorna el usuario con un token JWT generado.
+    - `check(user)`: Regenera un token para un usuario ya autenticado (útil para renovar tokens).
+    - `encryptPassword(password)`: Hashea contraseñas usando `bcrypt` con rondas configurables.
+  - **Inyección**: Utiliza `@InjectRepository(User)` para acceso a BD y `JwtService` para firmar tokens.
+
+#### Interfaces (`auth/interfaces/`)
+
+- **`Jwt`** (`jwt.interface.ts`):
+  - **Función**: Define la estructura del payload del JWT (`{ id, email, role }`).
+  - **Uso**: Tipo usado al firmar tokens y al validar en `JwtStrategy.validate`.
+
+#### DTOs (`auth/dto/`)
+
+- **`CreateUserDto`**: Define la estructura y validaciones para registro de usuarios.
+- **`LoginDto`**: Define la estructura y validaciones para el endpoint de login.
+
+### Módulo Users
+
+Responsabilidad general: Gestionar consultas y operaciones sobre usuarios (CRUD limitado).
+
+- **`UsersService`**: Lógica de negocio para buscar, actualizar y eliminar usuarios.
+- **`UsersController`**: Expone endpoints protegidos (normalmente requiere `superadmin`).
+- **`User` entity** (`users/entities/`): Entidad TypeORM con relaciones a `Project` y `Task`.
+
+### Módulo Projects
+
+Responsabilidad general: Gestionar proyectos con control de propietario y permisos.
+
+- **`ProjectsService`**: CRUD con reglas: usuarios normales solo acceden a sus proyectos; `superadmin` accede a todos.
+- **`ProjectsController`**: Endpoints protegidos que verifican propiedad antes de operaciones.
+- **`Project` entity**: Relación `ManyToOne` con `User` (owner) y `OneToMany` con `Task`.
+
+### Módulo Tasks
+
+Responsabilidad general: Gestionar tareas asociadas a proyectos, con control de permisos.
+
+- **`TasksService`**: CRUD con validación de que el proyecto pertenezca al usuario (o `superadmin`).
+- **`TasksController`**: Endpoints protegidos y consulta por proyecto (`GET /tasks/project/:projectId`).
+- **`Task` entity**: Relación `ManyToOne` con `Project` (con `onDelete: 'CASCADE'`) y opcionalmente con `User` asignado.
+
+### Módulo Seed
+
+Responsabilidad general: Limpiar y poblar la base de datos con datos semilla para desarrollo/testing.
+
+- **`SeedService`**: Ejecuta `TRUNCATE ... CASCADE` en tablas y repuebla con usuarios, proyectos y tareas de ejemplo.
+- **`SeedController`**: Expone endpoint `GET /seed` (solo para desarrollo).
+
+### Infraestructura
+
+- **`main.ts`**:
+  - **Función**: Bootstrap de la aplicación NestJS.
+  - **Configuraciones**:
+    - Prefijo global `api/v1` para todos los endpoints.
+    - `ValidationPipe` global con `whitelist`, `forbidNonWhitelisted` y `transform`.
+    - Swagger en `/docs` con configuración Bearer JWT.
+  
+- **`app.module.ts`**:
+  - **Función**: Módulo raíz que importa todos los módulos de funcionalidad.
+  - **Configuraciones**:
+    - `ConfigModule` global para variables de entorno.
+    - `TypeOrmModule` con conexión a PostgreSQL y `autoLoadEntities: true`.
+
+---
+
 ## Persistencia de datos (TypeORM)
 
 - Entidades:
