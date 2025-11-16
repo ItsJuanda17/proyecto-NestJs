@@ -1,0 +1,12 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Ejecutar tests antes de push
+echo "🧪 Ejecutando tests antes de push..."
+npm test
+
+# Ejecutar linter
+echo "🔍 Ejecutando linter..."
+npm run lint
+
+echo "✅ Todo OK, procediendo con push..."

@@ -389,21 +389,6 @@ Base: `http://localhost:3000/api/v1`
   - CRUD Users (admin), Projects y Tasks.
   - Carpeta Permissions: casos 403 (operar recursos ajenos) y overrides de `superadmin`.
 
----
 
-## Notas y buenas prácticas
-
-- No exponer `/seed` en producción; usar migraciones.
-- Mantener secretos y rondas de `bcrypt` en variables de entorno.
-- Permisos centralizados en servicios y cascada de FK para consistencia.
-
----
-
-## Resumen
-
-- API con autenticación JWT, autorización por roles y control de propietario.
-- CRUD completo de usuarios, proyectos y tareas con validación exhaustiva.
-- Persistencia sólida con TypeORM y `onDelete: 'CASCADE'` en tareas.
-- Documentación Swagger y pruebas con cobertura >90%.
 
 

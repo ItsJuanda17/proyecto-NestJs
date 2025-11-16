@@ -1,0 +1,41 @@
+services:
+  - type: web
+    name: nestjs-api
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm run start:prod
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DB_HOST
+        fromDatabase:
+          name: nestjs-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: nestjs-db
+          property: port
+      - key: DB_USER
+        fromDatabase:
+          name: nestjs-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: nestjs-db
+          property: password
+      - key: DB_NAME
+        fromDatabase:
+          name: nestjs-db
+          property: database
+      - key: JWT_SECRET
+        generateValue: true
+      - key: BCRYPT_SALT_ROUNDS
+        value: 10
+
+databases:
+  - name: nestjs-db
+    plan: free
+    databaseName: nestjs_db
+    user: nestjs_user
