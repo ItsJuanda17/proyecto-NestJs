@@ -4,7 +4,8 @@ WORKDIR /app
 
 COPY package*.json ./
 
-RUN npm ci && npm cache clean --force
+
+RUN npm ci --legacy-peer-deps && npm cache clean --force
 
 COPY . .
 
@@ -18,7 +19,8 @@ RUN apk add --no-cache dumb-init
 
 COPY package*.json ./
 
-RUN npm ci --only=production && npm cache clean --force
+
+RUN npm ci --omit=dev --legacy-peer-deps && npm cache clean --force
 
 COPY --from=builder /app/dist ./dist
 
