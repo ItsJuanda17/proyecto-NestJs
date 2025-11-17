@@ -54,8 +54,26 @@ export class ProjectsService {
       throw new ForbiddenException('No tienes permiso para modificar este proyecto');
     }
 
-    Object.assign(project, updateProjectDto);
-    return await this.projectRepository.save(project);
+    const updateData: any = {};
+    
+    if (updateProjectDto.title !== undefined) {
+      updateData.title = updateProjectDto.title;
+    }
+    if (updateProjectDto.description !== undefined) {
+      updateData.description = updateProjectDto.description;
+    }
+    if (updateProjectDto.status !== undefined) {
+      updateData.status = updateProjectDto.status;
+    }
+
+    await this.projectRepository.update(id, updateData);
+    const updatedProject = await this.projectRepository.findOne({ where: { id }, relations: ['user'] });
+    
+    if (!updatedProject) {
+      throw new NotFoundException(`Proyecto con ID ${id} no encontrado`);
+    }
+    
+    return updatedProject;
   }
 
   async remove(id: string, user: User): Promise<void> {
